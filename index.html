@@ -3,30 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>阳宅三部曲 · 快速体检｜Lumi Free</title>
-  <meta name="description" content="阳宅三部曲（内挂 / 外挂 / 空间）快速体检。emoji-only，结构化输出。" />
+  <title>阳宅三部曲 · Lumi Free</title>
+  <meta name="description" content="方位（内挂）× 家庭角色（外卦）× Room Type（用神）= 结构结果。Lumi Free emoji-only webapp。" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <main class="wrap">
     <header class="top">
       <div class="brand">
-        <div class="title">🟦 阳宅三部曲 · 快速体检</div>
-        <div class="sub">🏠 结构判断 · 🧠 行为建议 · 🆓 Lumi Free</div>
+        <div class="title">🟦 阳宅三部曲 · Lumi Free</div>
+        <div class="sub">🧩 内挂（方位） × 👥 外卦（长幼） × 🏠 用神（空间）</div>
       </div>
       <button id="btnTheme" class="btn ghost" type="button" aria-label="切换主题">🌙 / ☀️</button>
     </header>
 
     <section class="card hero">
       <div class="heroText">
-        <div class="kicker">📌 不是算凶吉：这是「空间 × 人 × 关系」的结构体检。</div>
-        <div class="prompt">「你现在的困扰，最可能卡在哪一曲？」</div>
-
+        <div class="kicker">📌 这不是断凶吉：是「结构合成」帮你决定先改哪里。</div>
+        <div class="prompt">「选方位 + 空间，用三部曲看结构」</div>
         <div class="row">
-          <button id="btnCheck" class="btn primary" type="button">✨ 体检</button>
+          <button id="btnAnalyze" class="btn primary" type="button">✨ 合成结果</button>
           <button id="btnReset" class="btn" type="button">🧹 重置</button>
         </div>
-        <div class="hint">⚠️ 同一件事不必反复体检；先做一项调整，再回来复盘。</div>
+        <div class="hint">✅ 建议：一次只看一个空间；先做 1 项调整，48 小时再复盘。</div>
       </div>
 
       <div class="heroPanel">
@@ -35,11 +34,11 @@
           <div id="timeLabel" class="miniValue">—</div>
         </div>
         <div class="mini">
-          <div class="miniTitle">🎯 当前主因</div>
-          <div id="primaryLabel" class="miniValue">—</div>
+          <div class="miniTitle">🎯 主结论</div>
+          <div id="headlineLabel" class="miniValue">—</div>
         </div>
         <div class="mini big">
-          <div class="miniTitle">🧾 建议优先级</div>
+          <div class="miniTitle">🧾 优先级</div>
           <div id="prioLabel" class="result">—</div>
         </div>
       </div>
@@ -47,64 +46,72 @@
 
     <section class="grid2">
       <section class="card">
-        <div class="cardTitle">🧩 选择你“最常待”的空间</div>
-        <div id="roomChips" class="chips"></div>
+        <div class="cardTitle">🧭 Step 1｜内挂：选择方位（后天八卦）</div>
+        <div id="dirChips" class="chips"></div>
         <div class="divider"></div>
-        <div class="muted" id="roomHint">选一个就够（先抓主战场）。</div>
+        <div class="muted" id="dirHint">例：你要看“厨房在什么方位”，就选厨房所在的方位。</div>
 
         <details class="details">
-          <summary>🧠 为什么先选空间？</summary>
+          <summary>🧠 小提醒：方位怎么取？</summary>
           <div class="detailsBody">
-            <p>三部曲里，空间是“问题出现在哪个层面”，而卧室/床位是“长期底层状态”。</p>
-            <p class="muted">所以：先抓你最常待的空间，判断再回到“内挂（卧室）”是否需要优先处理。</p>
+            <p>用“最接近的八方”就够：东/东南/南/西南/西/西北/北/东北。</p>
+            <p class="muted">Free 版不要求精确度数，先让结构跑起来。</p>
           </div>
         </details>
       </section>
 
       <section class="card">
-        <div class="cardTitle">🧭 选择你现在最困扰的主题</div>
-        <div id="themeChips" class="chips"></div>
+        <div class="cardTitle">🏠 Step 2｜用神：选择空间类型（Room Type）</div>
+        <div id="roomChips" class="chips"></div>
         <div class="divider"></div>
-        <div class="muted" id="themeHint">别贪多，一次只看一个主题。</div>
+        <div class="muted" id="roomHint">空间类型决定“事情落在哪个生活课题”。</div>
 
         <details class="details">
           <summary>🧷 什么时候不建议用？</summary>
           <div class="detailsBody">
-            <p>不建议把这当成“判决书”。如果涉及医疗、法律、重大财务，请以专业建议为主。</p>
-            <p class="muted">这个 App 的作用是：帮你更清楚“从哪里开始改”。</p>
+            <p>医疗、法律、重大财务请以专业意见为主。本 App 只做生活结构建议。</p>
           </div>
         </details>
       </section>
     </section>
 
     <section class="card">
-      <div class="cardTitle">🧾 体检结果</div>
+      <div class="cardTitle">👥 Step 3｜外卦：对应家庭角色（长幼有序）</div>
+      <div class="small muted">默认会按方位自动匹配角色；你也可以手动改成“实际更贴近的人”。</div>
+      <div class="row" style="margin-top:10px;">
+        <button id="btnAutoRole" class="btn" type="button">🧭 自动匹配</button>
+        <div class="selectWrap">
+          <label class="selectLabel" for="roleSelect">👤 选择角色</label>
+          <select id="roleSelect" class="select"></select>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div id="roleHint" class="muted">先选方位后，系统会建议一个默认角色。</div>
+    </section>
+
+    <section class="card">
+      <div class="cardTitle">🧾 合成结果</div>
       <div id="output" class="output">
-        <div class="muted">先选空间 + 主题，然后按「✨ 体检」。</div>
+        <div class="muted">先选：🧭方位 + 🏠空间 + 👥角色（可自动），再按「✨ 合成结果」。</div>
       </div>
     </section>
 
     <section class="card">
-      <div class="cardTitle">📚 三部曲速懂（极简版）</div>
-      <div class="table">
-        <div class="tr head">
-          <div class="td">部曲</div><div class="td">看什么</div><div class="td">一句话</div>
-        </div>
-        <div class="tr">
-          <div class="td">🛏️ 内挂</div><div class="td">卧室/床位</div><div class="td">你每天怎么“充电”</div>
-        </div>
-        <div class="tr">
-          <div class="td">👥 外挂</div><div class="td">家中角色</div><div class="td">谁最先被影响</div>
-        </div>
-        <div class="tr">
-          <div class="td">🏠 空间</div><div class="td">功能分区</div><div class="td">问题发生在哪个领域</div>
-        </div>
+      <div class="cardTitle">📚 三部曲公式（你刚定的）</div>
+      <div class="formula">
+        <div class="pill">🧭 方位（内挂）</div>
+        <div class="op">×</div>
+        <div class="pill">👥 长幼有序（外卦）</div>
+        <div class="op">×</div>
+        <div class="pill">🏠 Room Type（用神）</div>
+        <div class="op">=</div>
+        <div class="pill strong">🎯 Result（结构建议）</div>
       </div>
     </section>
 
     <footer class="foot">
       <div class="watermark">ig: <b>lumistudio2025</b></div>
-      <div class="disclaimer">📌 本 App 提供结构化生活建议与空间觉察，不作为风水断凶吉依据。</div>
+      <div class="disclaimer">📌 本 App 为结构化空间自检工具，不作凶吉断语，不替代专业意见。</div>
     </footer>
   </main>
 
