@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>阳宅三部曲 · 快速体检｜Lumi Free</title>
+  <meta name="description" content="阳宅三部曲（内挂 / 外挂 / 空间）快速体检。emoji-only，结构化输出。" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="title">🟦 阳宅三部曲 · 快速体检</div>
+        <div class="sub">🏠 结构判断 · 🧠 行为建议 · 🆓 Lumi Free</div>
+      </div>
+      <button id="btnTheme" class="btn ghost" type="button" aria-label="切换主题">🌙 / ☀️</button>
+    </header>
+
+    <section class="card hero">
+      <div class="heroText">
+        <div class="kicker">📌 不是算凶吉：这是「空间 × 人 × 关系」的结构体检。</div>
+        <div class="prompt">「你现在的困扰，最可能卡在哪一曲？」</div>
+
+        <div class="row">
+          <button id="btnCheck" class="btn primary" type="button">✨ 体检</button>
+          <button id="btnReset" class="btn" type="button">🧹 重置</button>
+        </div>
+        <div class="hint">⚠️ 同一件事不必反复体检；先做一项调整，再回来复盘。</div>
+      </div>
+
+      <div class="heroPanel">
+        <div class="mini">
+          <div class="miniTitle">🕰️ 记录时间</div>
+          <div id="timeLabel" class="miniValue">—</div>
+        </div>
+        <div class="mini">
+          <div class="miniTitle">🎯 当前主因</div>
+          <div id="primaryLabel" class="miniValue">—</div>
+        </div>
+        <div class="mini big">
+          <div class="miniTitle">🧾 建议优先级</div>
+          <div id="prioLabel" class="result">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <section class="card">
+        <div class="cardTitle">🧩 选择你“最常待”的空间</div>
+        <div id="roomChips" class="chips"></div>
+        <div class="divider"></div>
+        <div class="muted" id="roomHint">选一个就够（先抓主战场）。</div>
+
+        <details class="details">
+          <summary>🧠 为什么先选空间？</summary>
+          <div class="detailsBody">
+            <p>三部曲里，空间是“问题出现在哪个层面”，而卧室/床位是“长期底层状态”。</p>
+            <p class="muted">所以：先抓你最常待的空间，判断再回到“内挂（卧室）”是否需要优先处理。</p>
+          </div>
+        </details>
+      </section>
+
+      <section class="card">
+        <div class="cardTitle">🧭 选择你现在最困扰的主题</div>
+        <div id="themeChips" class="chips"></div>
+        <div class="divider"></div>
+        <div class="muted" id="themeHint">别贪多，一次只看一个主题。</div>
+
+        <details class="details">
+          <summary>🧷 什么时候不建议用？</summary>
+          <div class="detailsBody">
+            <p>不建议把这当成“判决书”。如果涉及医疗、法律、重大财务，请以专业建议为主。</p>
+            <p class="muted">这个 App 的作用是：帮你更清楚“从哪里开始改”。</p>
+          </div>
+        </details>
+      </section>
+    </section>
+
+    <section class="card">
+      <div class="cardTitle">🧾 体检结果</div>
+      <div id="output" class="output">
+        <div class="muted">先选空间 + 主题，然后按「✨ 体检」。</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="cardTitle">📚 三部曲速懂（极简版）</div>
+      <div class="table">
+        <div class="tr head">
+          <div class="td">部曲</div><div class="td">看什么</div><div class="td">一句话</div>
+        </div>
+        <div class="tr">
+          <div class="td">🛏️ 内挂</div><div class="td">卧室/床位</div><div class="td">你每天怎么“充电”</div>
+        </div>
+        <div class="tr">
+          <div class="td">👥 外挂</div><div class="td">家中角色</div><div class="td">谁最先被影响</div>
+        </div>
+        <div class="tr">
+          <div class="td">🏠 空间</div><div class="td">功能分区</div><div class="td">问题发生在哪个领域</div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <div class="watermark">ig: <b>lumistudio2025</b></div>
+      <div class="disclaimer">📌 本 App 提供结构化生活建议与空间觉察，不作为风水断凶吉依据。</div>
+    </footer>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
