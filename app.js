@@ -1,86 +1,45 @@
-// 阳宅三部曲 · 快速体检（Lumi Free）
-// 目的：用“空间 + 主题”快速判断：主因更像 内挂 / 外挂 / 空间，并给出可执行建议
-// 注意：这是结构判断，不做凶吉断语
+// Lumi Free — 阳宅风水三部曲（结构合成引擎）
+// Result = 内挂（方位/八卦） × 外卦（长幼有序/家庭角色） × 用神（Room Type/空间功能）
+
+const DIRS = [
+  { id:"qian", label:"⬈ 西北 乾", trigram:"乾", emoji:"🧭", role:"父 / 权威", core:["规则","决断","边界"], risk:["压迫感","控制欲","硬碰硬"], fix:["把规则讲清（谁负责什么）","减少高压对话（先写后说）","公共空间留出“缓冲区”"] },
+  { id:"kun",  label:"⬋ 西南 坤", trigram:"坤", emoji:"🧭", role:"母 / 承载", core:["承载","照顾","稳定"], risk:["过度消耗","闷着不说","一人扛全家"], fix:["把家务/照顾分工写出来","减少堆积（先减负）","给照顾者留休息角落"] },
+  { id:"zhen", label:"➡️ 正东 震", trigram:"震", emoji:"🧭", role:"长男 / 行动", core:["启动","行动","变化"], risk:["急躁","冲动","噪动"], fix:["动线清出来（走得顺）","把“容易爆的点”降刺激","需要行动就拆成小步"] },
+  { id:"xun",  label:"↘️ 东南 巽", trigram:"巽", emoji:"🧭", role:"长女 / 流动", core:["沟通","流动","细节"], risk:["想太多","摇摆","信息过载"], fix:["减少视觉杂讯（桌面/台面）","沟通先对齐事实再谈感受","用清单代替脑内循环"] },
+  { id:"kan",  label:"⬇️ 正北 坎", trigram:"坎", emoji:"🧭", role:"中男 / 压力", core:["压力","隐忧","深层情绪"], risk:["焦虑","担心","睡不好"], fix:["先减损（噪音/光/潮湿）","把不确定写下来做方案A/B","恢复优先（睡眠/休息）"] },
+  { id:"li",   label:"⬆️ 正南 离", trigram:"离", emoji:"🧭", role:"中女 / 情绪", core:["可见","热度","表达"], risk:["情绪起伏","容易吵","过度曝光"], fix:["把强光/强刺激降一点","争论改成‘短句+暂停’","让家里有一个安静区"] },
+  { id:"gen",  label:"⬅️ 东北 艮", trigram:"艮", emoji:"🧭", role:"少男 / 稳定", core:["停止","稳住","边界"], risk:["卡住","拖延","不动"], fix:["先做一个可完成的小整理","设一个‘结束点’（别无限拖）","把阻挡物移走（门口/走道）"] },
+  { id:"dui",  label:"⬅️ 正西 兑", trigram:"兑", emoji:"🧭", role:"少女 / 表达", core:["交流","喜悦","社交"], risk:["口舌","误会","玩太嗨没收"], fix:["沟通先讲重点（少绕）","公共区设‘收尾规则’","把吵闹源头降音量"] },
+];
 
 const ROOMS = [
-  { id: "bedroom",  label: "🛏️ 卧室",   domain: "rest" },
-  { id: "bed",      label: "🧸 床位",   domain: "rest" },
-  { id: "living",   label: "🛋️ 客厅",   domain: "social" },
-  { id: "door",     label: "🚪 大门",   domain: "gateway" },
-  { id: "kitchen",  label: "🍳 厨房",   domain: "resource" },
-  { id: "toilet",   label: "🚽 厕所",   domain: "leak" },
-  { id: "study",    label: "📚 书房",   domain: "focus" },
-  { id: "balcony",  label: "🌿 阳台",   domain: "outlet" },
-  { id: "workdesk", label: "💻 工作位", domain: "focus" },
+  { id:"door",    label:"🚪 大门", domain:"机会/外界", key:"gateway",
+    use:["机会入口","出入节奏","对外互动"], fix:["入口清爽（别堆鞋山）","灯光要够（不压）","门口动线顺（别卡）"] },
+  { id:"living",  label:"🛋️ 客厅", domain:"关系/流通", key:"social",
+    use:["关系气氛","交流质量","家人相处"], fix:["沙发区别堆物（压迫感）","保持一个“可坐可聊”的空位","把争吵点移出公共区"] },
+  { id:"bedroom", label:"🛏️ 卧室", domain:"恢复/底层", key:"rest",
+    use:["睡眠","恢复","情绪基线"], fix:["床边1米清空","睡前降刺激（灯/手机）","床只做休息"] },
+  { id:"kitchen", label:"🍳 厨房", domain:"资源/财", key:"resource",
+    use:["供给能力","财务消耗","家庭运转"], fix:["台面减杂（先减损）","坏掉的先修/先丢","把常用物放顺手"] },
+  { id:"toilet",  label:"🚽 厕所", domain:"消耗/泄", key:"leak",
+    use:["消耗点","情绪泄洪","卫生与气味"], fix:["干爽+无味优先","漏水/堵塞先处理","门口保持整洁（别外溢）"] },
+  { id:"study",   label:"📚 书房", domain:"思考/决策", key:"focus",
+    use:["专注","学习","决策质量"], fix:["桌面只留一件主任务","光线均匀不刺眼","线材/杂物收束"] },
+  { id:"workdesk",label:"💻 工作位", domain:"产出/执行", key:"focus",
+    use:["执行力","效率","压力管理"], fix:["屏幕高度/坐姿先舒服","通知降噪（少弹窗）","每天收尾 3 分钟"] },
+  { id:"balcony", label:"🌿 阳台", domain:"出口/未来", key:"outlet",
+    use:["透气感","未来感","对外视野"], fix:["清掉不用的储物","让空气能流动","留一个小角落可站/可呼吸"] },
 ];
 
-const THEMES = [
-  { id: "energy",   label: "⚡ 精力",     bias: { inner: 3, outer: 0, space: 2 } },
-  { id: "love",     label: "💕 感情",     bias: { inner: 1, outer: 3, space: 2 } },
-  { id: "family",   label: "👨‍👩‍👧‍👦 家庭", bias: { inner: 1, outer: 3, space: 2 } },
-  { id: "work",     label: "🧑‍💼 工作",   bias: { inner: 1, outer: 1, space: 3 } },
-  { id: "money",    label: "💰 财务",     bias: { inner: 1, outer: 0, space: 3 } },
-  { id: "conflict", label: "💥 口舌",     bias: { inner: 0, outer: 3, space: 2 } },
-  { id: "sleep",    label: "😴 睡眠",     bias: { inner: 4, outer: 0, space: 1 } },
-  { id: "study",    label: "📈 学业",     bias: { inner: 1, outer: 0, space: 3 } },
+const ROLES = [
+  "父 / 权威","母 / 承载",
+  "长男 / 行动","长女 / 流动",
+  "中男 / 压力","中女 / 情绪",
+  "少男 / 稳定","少女 / 表达",
+  "自己 / 当事人","伴侣 / 另一半"
 ];
 
-const TRIAD = {
-  inner: { emoji: "🛏️", name: "内挂", desc: "卧室/床位：你每天怎么“充电”", key: "inner" },
-  outer: { emoji: "👥", name: "外挂", desc: "家中角色：谁最先被影响", key: "outer" },
-  space: { emoji: "🏠", name: "空间", desc: "功能分区：问题卡在哪个领域", key: "space" },
-};
-
-const SPACE_HINT = {
-  rest:     { add: { inner: 3, space: 1 }, text: "你选的是休息区：优先看“内挂”是否拖累。"},
-  social:   { add: { outer: 2, space: 2 }, text: "你选的是互动区：更像“外挂 + 空间”的组合问题。"},
-  gateway:  { add: { space: 3 },           text: "你选的是入口：多半是“机会/外界流动”的空间层问题。"},
-  resource: { add: { space: 3 },           text: "你选的是资源区：财务/供给常落在空间层（使用方式）。"},
-  leak:     { add: { space: 3 },           text: "你选的是消耗区：先减损，再谈增强。"},
-  focus:    { add: { space: 3, inner: 1 }, text: "你选的是专注区：空间层为主，但也可能影响内挂节律。"},
-  outlet:   { add: { space: 2 },           text: "你选的是出口区：更像“空间流通”与“节律”的问题。"},
-};
-
-const ACTIONS = {
-  inner: {
-    title: "🛠️ 内挂优先：先把“充电系统”修好",
-    bullets: [
-      "🧺 先把床周边 1m 清空：杂物/纸箱/堆叠先移走",
-      "🪟 睡前 30 分钟降刺激：关强光、收手机、关吵杂",
-      "🧸 床只做两件事：睡觉 & 休息（别在床上开会/刷剧）",
-      "🧼 枕头/床单先换一轮：把“身体不适”变量降到最低",
-      "🧭 若能调：床头靠实、动线顺（不求玄，只求安心）",
-    ],
-    tags: ["恢复", "节律", "情绪基线"],
-    why: "很多“关系/工作/财务”的乱，其实是你长期没充够电。先修底层，后面才有力。"
-  },
-  outer: {
-    title: "🛠️ 外挂优先：先处理“角色压力”",
-    bullets: [
-      "🗣️ 先定义一条家庭规则：什么事可以说、什么事先冷却再说",
-      "📦 把“公共空间的权责”讲清：谁负责、谁决定、谁收尾",
-      "🧾 把争论从“对错”改成“分工”：把情绪降维成流程",
-      "🧠 记一句：先处理误会，再处理事情（顺序错就一直吵）",
-      "🫶 给角色留出口：每个人要有自己的休息角落/时间",
-    ],
-    tags: ["边界", "分工", "沟通方式"],
-    why: "外挂问题常见的不是“家里风水不好”，而是“角色没被照顾、边界不清”。"
-  },
-  space: {
-    title: "🛠️ 空间优先：先改“使用方式”而不是改格局",
-    bullets: [
-      "🧭 先做一条动线：从门→客厅→关键空间，走起来别被卡",
-      "🧺 每个空间只留一个主功能：别让厨房变仓库、书桌变杂物台",
-      "🧻 ‘消耗点’先减损：厕所/杂物角先清理，再谈增强",
-      "🧯 把冲突点降噪：高噪音/强光/尖角冲撞感先处理（用布/灯/摆位）",
-      "📍 选一个空间做“恢复区”：让家里至少有一个地方是舒服的",
-    ],
-    tags: ["动线", "功能", "减损优先"],
-    why: "空间层的问题，最常是“东西不在该在的位置”。先改用法，胜过大动工程。"
-  }
-};
-
-let state = { room: null, theme: null };
+let state = { dir:null, room:null, role:null };
 
 const $ = (id) => document.getElementById(id);
 
@@ -99,7 +58,7 @@ function toggleTheme(){
   applyTheme(cur === "dark" ? "light" : "dark");
 }
 
-function makeChip(label, active, onClick){
+function chip(label, active, onClick){
   const b = document.createElement("button");
   b.type = "button";
   b.className = "chip" + (active ? " active" : "");
@@ -108,145 +67,168 @@ function makeChip(label, active, onClick){
   return b;
 }
 
-function renderRooms(){
+function renderDir(){
+  const wrap = $("dirChips");
+  wrap.innerHTML = "";
+  DIRS.forEach(d=>{
+    wrap.appendChild(chip(d.label, state.dir?.id===d.id, ()=>{
+      state.dir = d;
+      renderDir();
+      // auto role suggestion
+      autoRole();
+      $("dirHint").textContent = `已选：${d.label}（${d.trigram}）｜默认角色：${d.role}`;
+    }));
+  });
+}
+
+function renderRoom(){
   const wrap = $("roomChips");
   wrap.innerHTML = "";
   ROOMS.forEach(r=>{
-    wrap.appendChild(makeChip(r.label, state.room?.id === r.id, ()=>{
+    wrap.appendChild(chip(r.label, state.room?.id===r.id, ()=>{
       state.room = r;
-      renderRooms();
-      $("roomHint").textContent = SPACE_HINT[r.domain]?.text || "已选择空间。";
+      renderRoom();
+      $("roomHint").textContent = `已选：${r.label}｜用神课题：${r.domain}`;
     }));
   });
 }
 
-function renderThemes(){
-  const wrap = $("themeChips");
-  wrap.innerHTML = "";
-  THEMES.forEach(t=>{
-    wrap.appendChild(makeChip(t.label, state.theme?.id === t.id, ()=>{
-      state.theme = t;
-      renderThemes();
-      $("themeHint").textContent = "已选择主题。";
-    }));
+function renderRoleSelect(){
+  const sel = $("roleSelect");
+  sel.innerHTML = "";
+  ROLES.forEach(r=>{
+    const opt = document.createElement("option");
+    opt.value = r;
+    opt.textContent = r;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener("change", ()=>{
+    state.role = sel.value;
+    $("roleHint").textContent = `当前角色：${state.role}`;
   });
 }
 
-function scoreTriad(){
-  // 基础分：主题偏向 + 空间域加权
-  const score = { inner: 0, outer: 0, space: 0 };
-
-  if (!state.theme || !state.room) return null;
-
-  // 主题 bias
-  score.inner += state.theme.bias.inner || 0;
-  score.outer += state.theme.bias.outer || 0;
-  score.space += state.theme.bias.space || 0;
-
-  // 空间 domain 加权
-  const hint = SPACE_HINT[state.room.domain];
-  if (hint?.add){
-    Object.entries(hint.add).forEach(([k,v])=>{
-      score[k] += v;
-    });
-  }
-
-  // 卧室/床位进一步偏内挂
-  if (state.room.id === "bedroom" || state.room.id === "bed") {
-    score.inner += 2;
-  }
-
-  // 客厅/大门偏外/空间
-  if (state.room.id === "living") { score.outer += 1; score.space += 1; }
-  if (state.room.id === "door")   { score.space += 2; }
-
-  return score;
+function autoRole(){
+  if (!state.dir) return;
+  state.role = state.dir.role;
+  $("roleSelect").value = state.role;
+  $("roleHint").textContent = `自动匹配角色：${state.role}（可手动改）`;
 }
 
-function rank(score){
-  const entries = Object.entries(score).sort((a,b)=>b[1]-a[1]);
-  return entries.map(([k,v])=>({ key:k, val:v, ...TRIAD[k] }));
+function uniq(arr){
+  return Array.from(new Set(arr.filter(Boolean)));
 }
 
-function buildOutput(primary, ranking){
+function buildHeadline(dir, room, role){
+  // headline = 结构核心 + 用神领域 + 角色
+  return `${dir.trigram}位结构偏向「${dir.core[0]}」× ${room.domain} → 先看：${role}`;
+}
+
+function priority(dir, room){
+  // 简单优先级：若 room 属于 rest/leak/resource/focus/gateway/social/outlet
+  // 输出：先空间（用神整理）还是先内挂（节律/恢复）或先外卦（沟通边界）
+  const key = room.key;
+  if (key === "rest") return "1️⃣ 🛏️ 内挂（恢复） → 2️⃣ 🏠 用神（空间用法） → 3️⃣ 👥 外卦（边界/沟通）";
+  if (key === "leak") return "1️⃣ 🏠 用神（先减损） → 2️⃣ 🛏️ 内挂（恢复） → 3️⃣ 👥 外卦（分工）";
+  if (key === "resource") return "1️⃣ 🏠 用神（资源管理） → 2️⃣ 👥 外卦（分工） → 3️⃣ 🛏️ 内挂（节律）";
+  if (key === "focus") return "1️⃣ 🏠 用神（专注环境） → 2️⃣ 🛏️ 内挂（节律） → 3️⃣ 👥 外卦（干扰源）";
+  if (key === "gateway") return "1️⃣ 🏠 用神（入口/动线） → 2️⃣ 👥 外卦（对外节奏） → 3️⃣ 🛏️ 内挂（稳住）";
+  if (key === "social") return "1️⃣ 👥 外卦（边界/沟通） → 2️⃣ 🏠 用神（公共区用法） → 3️⃣ 🛏️ 内挂（情绪基线）";
+  return "1️⃣ 🏠 用神（先做一处） → 2️⃣ 🛏️ 内挂（节律） → 3️⃣ 👥 外卦（关系）";
+}
+
+function synthesize(){
+  const dir = state.dir;
   const room = state.room;
-  const theme = state.theme;
-  const a = ACTIONS[primary.key];
+  const role = state.role;
 
-  const secondary = ranking[1];
-  const tertiary  = ranking[2];
+  if (!dir || !room || !role){
+    $("output").innerHTML = `<div class="muted">还差一步：请先选 🧭方位 + 🏠空间 + 👥角色（可自动），再按「✨ 合成结果」。</div>`;
+    return;
+  }
 
-  const prioLine = `1️⃣ ${primary.emoji}${primary.name}  →  2️⃣ ${secondary.emoji}${secondary.name}  →  3️⃣ ${tertiary.emoji}${tertiary.name}`;
+  const headline = buildHeadline(dir, room, role);
+  const prio = priority(dir, room);
 
   $("timeLabel").textContent = nowStr();
-  $("primaryLabel").textContent = `${primary.emoji} ${primary.name}`;
-  $("prioLabel").textContent = prioLine;
+  $("headlineLabel").textContent = headline;
+  $("prioLabel").textContent = prio;
 
-  const box = $("output");
-  box.innerHTML = `
+  const risk = uniq([
+    ...dir.risk.map(x=>`⚠️ ${x}`),
+    `📌 课题落点：${room.domain}`
+  ]);
+
+  const action = uniq([
+    ...room.fix.map(x=>`🏠 ${x}`),
+    ...dir.fix.map(x=>`🧭 ${x}`),
+  ]).slice(0, 6);
+
+  const output = `
     <div class="block">
-      <div class="h">🎯 你选的：${room.label} × ${theme.label}</div>
-      <div class="small">📌 这是结构判断：帮你决定“从哪里开始改”。</div>
-      <div class="divider"></div>
-
-      <div class="h">✅ 当前最像的主因：${primary.emoji} ${primary.name}</div>
-      <div>• ${primary.desc}</div>
-      <div class="small">🧠 为什么：${a.why}</div>
-
+      <div class="h">✅ 三部曲合成（你选的组合）</div>
+      <div>• 🧭 内挂：${dir.label}（${dir.trigram}）</div>
+      <div>• 👥 外卦：${role}</div>
+      <div>• 🏠 用神：${room.label}（${room.domain}）</div>
       <div class="tagrow">
-        ${a.tags.map(t=>`<span class="tag">#${t}</span>`).join("")}
+        ${dir.core.map(t=>`<span class="tag">#${t}</span>`).join("")}
+        <span class="tag">#${room.domain}</span>
       </div>
     </div>
 
     <div class="block">
-      <div class="h">${a.title}</div>
-      <ul class="todo">
-        ${a.bullets.map(b=>`<li>${b}</li>`).join("")}
-      </ul>
-      <div class="small">⏱️ 建议：先做其中 <b>1 项</b>，48 小时内观察变化，再做下一项。</div>
+      <div class="h">🎯 主结论（结构画像）</div>
+      <div>• ${headline}</div>
+      <div class="small muted">这不是凶吉断语：它告诉你“最可能卡在哪个结构层”，以及先做什么更有效。</div>
     </div>
 
     <div class="block">
-      <div class="h">🧾 建议优先级（为什么这么排）</div>
-      <div>• 1️⃣ ${primary.emoji}${primary.name}：这层是“根因/底层”</div>
-      <div>• 2️⃣ ${secondary.emoji}${secondary.name}：这层是“被牵动的反应层”</div>
-      <div>• 3️⃣ ${tertiary.emoji}${tertiary.name}：这层是“最后才优化的表现层”</div>
-      <div class="small">📌 你不用一次改完。一次改一件事，才会真的见效。</div>
+      <div class="h">🧠 常见卡点（你可以对照）</div>
+      <div>${risk.join("<br>")}</div>
+    </div>
+
+    <div class="block">
+      <div class="h">🛠️ 48 小时行动清单（选 1–2 项就好）</div>
+      <ul class="todo">
+        ${action.map(a=>`<li>${a}</li>`).join("")}
+      </ul>
+      <div class="small muted">✅ 做完后再回来看：情绪、沟通、效率有没有变“轻一点”。</div>
+    </div>
+
+    <div class="block">
+      <div class="h">🧾 优先级（为什么这样排）</div>
+      <div>• ${prio}</div>
+      <div class="small muted">优先级不是绝对真理，是“最省力的改法”。先用小改动换到大感受。</div>
     </div>
   `;
-}
 
-function doCheck(){
-  if (!state.room || !state.theme){
-    $("output").innerHTML = `<div class="muted">还差一步：请先选空间 + 主题，然后再按「✨ 体检」。</div>`;
-    return;
-  }
-  const score = scoreTriad();
-  const ranking = rank(score);
-  const primary = ranking[0];
-  buildOutput(primary, ranking);
+  $("output").innerHTML = output;
 }
 
 function resetAll(){
-  state = { room: null, theme: null };
-  renderRooms();
-  renderThemes();
+  state = { dir:null, room:null, role:null };
   $("timeLabel").textContent = "—";
-  $("primaryLabel").textContent = "—";
+  $("headlineLabel").textContent = "—";
   $("prioLabel").textContent = "—";
-  $("roomHint").textContent = "选一个就够（先抓主战场）。";
-  $("themeHint").textContent = "别贪多，一次只看一个主题。";
-  $("output").innerHTML = `<div class="muted">先选空间 + 主题，然后按「✨ 体检」。</div>`;
+  $("dirHint").textContent = "例：你要看“厨房在什么方位”，就选厨房所在的方位。";
+  $("roomHint").textContent = "空间类型决定“事情落在哪个生活课题”。";
+  $("roleHint").textContent = "先选方位后，系统会建议一个默认角色。";
+  renderDir();
+  renderRoom();
+  $("roleSelect").value = ROLES[0];
+  $("output").innerHTML = `<div class="muted">先选：🧭方位 + 🏠空间 + 👥角色（可自动），再按「✨ 合成结果」。</div>`;
 }
 
 (function init(){
   const saved = localStorage.getItem("lumi_theme");
   applyTheme(saved || "dark");
 
-  renderRooms();
-  renderThemes();
+  renderRoleSelect();
+  renderDir();
+  renderRoom();
 
   $("btnTheme").addEventListener("click", toggleTheme);
-  $("btnCheck").addEventListener("click", doCheck);
+  $("btnAnalyze").addEventListener("click", synthesize);
   $("btnReset").addEventListener("click", resetAll);
+  $("btnAutoRole").addEventListener("click", autoRole);
 })();
